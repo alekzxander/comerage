@@ -9,6 +9,12 @@ const bcrypt = require('bcrypt-nodejs');
 // articleModel.hasMany(commentModel, { onDelete: 'CASCADE' });
 
 const index = (app) => {
+    app.use(function (req, res, next) {
+        res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
     app.get('/articles', async (req, res) => {
         const articles = await articleModel.findAll({
             where: {
@@ -24,6 +30,14 @@ const index = (app) => {
             }
         });
         res.json({ comments })
+    });
+    app.get('/user/:user_id', async (req, res) => {
+        const user = await userModel.find({
+            where: {
+                id: req.params.user_id
+            }
+        })
+        res.json({ nickname: user.nickname, id: user.id, email: user.email })
     })
     app.get('/categories/:article_id', async (req, res) => {
         const categoriesArticle = await categoryArticleModel.findAll({

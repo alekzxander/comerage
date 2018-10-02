@@ -13,7 +13,6 @@ export default class App extends Component {
           {/* <Login /> */}
         </div>
         <div className="container">
-          <h1>Hello world</h1>
           <Articles />
         </div>
 
