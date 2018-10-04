@@ -41,10 +41,11 @@ const renderField = ({
         </div>
     )
 
-const Login = props => {
+const Register = props => {
     const { handleSubmit, submitting } = props
     return (
         <form onSubmit={(e) => handleSubmit(e)}>
+            <Field name="nickname" type="text" component={renderField} label="Pseudo" />
             <Field
                 name="email"
                 type="text"
@@ -54,7 +55,7 @@ const Login = props => {
             <Field name="password" type="password" component={renderField} label="Password" />
             <div>
                 <button type="submit" disabled={submitting}>
-                    Se connecter
+                    S'inscrire
         </button>
             </div>
         </form>
@@ -65,4 +66,4 @@ export default reduxForm({
     form: 'syncValidation', // a unique identifier for this form
     validate, // <--- validation function given to redux-form
     warn // <--- warning function given to redux-form
-})(Login)
+})(Register)
