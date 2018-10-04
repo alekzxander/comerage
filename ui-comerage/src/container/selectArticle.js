@@ -30,7 +30,8 @@ class SelectArticle extends React.Component {
             })
         }
     }
-    submitComment() {
+    submitComment(e) {
+        e.preventDefault()
         if (this.state.message.length > 4) {
             this.props.addComment(this.props.user.token, this.state.message, this.props.article.id);
             this.setState({

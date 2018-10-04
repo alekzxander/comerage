@@ -14,7 +14,7 @@ const articleModel = sequelizeDb.define('articles', {
         type: Sequelize.BOOLEAN,
         allowNull: true
     },
-    users_id: {
+    user_id: {
         type: Sequelize.INTEGER,
         allowNull: false
     }

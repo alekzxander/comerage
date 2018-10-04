@@ -5,8 +5,13 @@ const categoryArticleModel = require('../models/article_category');
 const commentModel = require('../models/comments');
 const categoryModel = require('../models/categories');
 const bcrypt = require('bcrypt-nodejs');
+const Sequelize = require('sequelize');
 
-// articleModel.hasMany(commentModel, { onDelete: 'CASCADE' });
+articleModel.hasMany(commentModel);
+articleModel.belongsTo(userModel);
+
+// userModel.hasMany(articleModel);
+userModel.hasMany(commentModel);
 
 const index = (app) => {
     app.use(function (req, res, next) {
@@ -14,22 +19,35 @@ const index = (app) => {
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         next();
     });
-
+    app.get('/categories', async (req, res) => {
+        const categories = await categoryModel.findAll();
+        res.json({ categories })
+    })
     app.get('/articles', async (req, res) => {
         const articles = await articleModel.findAll({
             where: {
                 draft: false
-            }
+            },
+            order: [['publication_date', 'DESC']]
         });
         res.json({ articles })
     });
     app.get('/comments/:article_id', async (req, res) => {
-        const comments = await commentModel.findAll({
+
+        const article = await articleModel.findOne({
             where: {
-                articles_id: req.params.article_id
-            }
-        });
-        res.json({ comments })
+                id: req.params.article_id
+            },
+            include: [
+                {
+                    model: commentModel,
+                }, {
+                    model: userModel
+                }
+            ],
+
+        })
+        res.json({ article })
     });
     app.get('/user/:user_id', async (req, res) => {
         const user = await userModel.find({
@@ -53,8 +71,27 @@ const index = (app) => {
                 id: categories
             }
         })
-        res.json({ categoriesName })
-    })
+        let arrayName = [];
+        categoriesName.map((cat) => {
+            arrayName.push(cat.name)
+        })
+        res.json({ arrayName })
+    });
+    app.get('/article/:article_id', async (req, res) => {
+        const article = await articleModel.findOne({
+            where: {
+                id: req.params.article_id
+            },
+            include: [
+                {
+                    model: commentModel,
+                }, {
+                    model: userModel
+                }
+            ],
+        })
+        res.json({ article })
+    });
     app.post('/create-user', async (req, res) => {
         const password = userModel.generateHash(req.body.password);
         const user = {
@@ -68,10 +105,9 @@ const index = (app) => {
             }
         });
         if (!existingUser) {
-            console.log(existingUser)
             const createUser = await userModel.create(user);
             const token = jwt.sign({ data: req.body.email, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, 'secret');
-            res.json({ token })
+            res.json({ token, name: createUser.nickname, id: createUser.id })
         } else {
             res.json({ response: req.body.email + ' already exist' })
         }
@@ -82,14 +118,16 @@ const index = (app) => {
                 email: req.body.email
             }
         });
-        bcrypt.compare(req.body.password, user.password, (err, pass) => {
-            if (pass) {
-                const token = jwt.sign({ data: req.body.email, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, 'secret');
-                return res.json({ response: `${user.nickname} is connected`, token })
-            } else {
-                return res.json({ response: 'password not valid' })
-            }
-        })
+        if (user) {
+            bcrypt.compare(req.body.password, user.password, (err, pass) => {
+                if (pass) {
+                    const token = jwt.sign({ data: req.body.email, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, 'secret');
+                    return res.json({ name: user.nickname, id: user.id, token })
+                } else {
+                    return res.json({ response: 'password not valid' })
+                }
+            });
+        }
     });
     app.post('/create-article', verifyToken, async (req, res) => {
         const userAuth = checkToken(req.token);
@@ -103,9 +141,9 @@ const index = (app) => {
             })
             const article = {
                 body: req.body.body,
-                draft: true,
+                draft: false,
                 publication_date: Date.now(),
-                users_id: user.id
+                user_id: user.id
             }
             const data = await articleModel.create(article);
             const category = {
@@ -133,7 +171,7 @@ const index = (app) => {
                     email: userAuth.data
                 }
             });
-            if (user.id === articleSelected.users_id) {
+            if (user.id === articleSelected.user_id) {
                 articleSelected.update({ body: req.body.body })
                 res.sendStatus(200)
             } else {
@@ -175,11 +213,11 @@ const index = (app) => {
             const comment = {
                 body: req.body.body,
                 publication_date: Date.now(),
-                users_id: user.id,
-                articles_id: article.id
+                user_id: user.id,
+                article_id: article.id
             }
-            const commentCreated = await commentModel.create(comment)
-            res.json({ message: user, commentCreated })
+            const commentCreate = await commentModel.create(comment)
+            res.json({ commentCreate })
         }
     });
     app.get('/delete-article/:id', verifyToken, async (req, res) => {
@@ -198,7 +236,7 @@ const index = (app) => {
                             email: authData.data
                         }
                     });
-                    if (user.id === articleSelected.users_id) {
+                    if (user.id === articleSelected.user_id) {
                         const articleCategory = await categoryArticleModel.findAll({
                             where: {
                                 articles_id: articleSelected.id
@@ -225,6 +263,7 @@ const index = (app) => {
         });
     });
     function verifyToken(req, res, next) {
+        console.log(req.headers['authorization'], 'autorization header')
         const bearerHeader = req.headers['authorization'];
         if (bearerHeader) {
             req.token = bearerHeader;

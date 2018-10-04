@@ -10,11 +10,11 @@ const commentModel = sequelizeDb.define('comments', {
         type: Sequelize.DATE,
         allowNull: false
     },
-    users_id: {
+    user_id: {
         type: Sequelize.INTEGER,
         allowNull: false
     },
-    articles_id: {
+    article_id: {
         type: Sequelize.INTEGER,
         allowNull: false
     }

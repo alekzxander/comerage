@@ -7,14 +7,23 @@ const userModel = sequelizeDb.define('users', {
         type: Sequelize.STRING(100),
         unique: true,
         allowNull: false,
+        validate: {
+            notEmpty: true
+        }
     },
     nickname: {
         type: Sequelize.STRING(60),
         allowNull: false,
+        validate: {
+            notEmpty: true
+        }
     },
     password: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: true
+        }
     },
 }
 );

@@ -1,5 +1,5 @@
 import React from 'react'
-import { getArticles, selectArticle } from '../action/index';
+import { getArticles, selectArticle, getCategories, createArticle, filterCategories } from '../action/index';
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { Link, withRouter } from 'react-router-dom';
@@ -15,15 +15,17 @@ class Articles extends React.Component {
     }
     componentWillMount = () => {
         this.props.getArticles();
+        this.props.getCategories();
     }
     displayArticles = (articles) => {
         if (articles && Array.isArray(articles)) {
             return articles.map((article) => {
                 return (<div key={article.id} className="article">
                     <Link to="/article" onClick={() => this.props.selectArticle(article.id)}><p>{article.body}</p></Link>
-                    {article.categories.map((cat) => {
-                        return <button key={cat.id} disabled className="category-article">{cat.name}</button>
+                    {article.categories.map((cat, id) => {
+                        return <button key={id} disabled className="category-article">{cat}</button>
                     })
+
                     }
                     <h6 className="date-article">{article.date}</h6>
                     <h6 className="user-article">Posted by {article.userName}</h6>
@@ -32,17 +34,38 @@ class Articles extends React.Component {
             })
         }
     }
+    displayCategories = (categories) => {
+        return categories.map((category) => {
+            return (
+                <label key={category.id} className="container-check">{category.name}
+                    <input type="checkbox" name={category.name} onChange={this.props.filterCategories} />
+                    <span className="checkmark"></span>
+                </label>
+            )
+        })
+    }
     submitArticle(event) {
-        const cuisine = event.target.Cuisine.value;
-        const cinema = event.target.Cinema.value;
-        const sport = event.target.Sport.value;
-        const culture = event.target.Culture.value;
-        console.log(cuisine, cinema, sport, culture)
         event.preventDefault();
+        const cinema = event.target.Cinema;
+        const sport = event.target.Sport;
+        const musique = event.target.Musique;
+        const culture = event.target.Culture;
+        const politique = event.target.Politique;
+        const categories = [cinema, sport, musique, culture, politique]
+        const getCategories = categories.filter((category) => {
+            if (category.value) {
+                return category.id
+            }
+            return false;
+        })
+        const getIdCategories = getCategories.map((cat) => {
+            return cat.id
+        })
+        this.props.createArticle(this.props.user.token, event.target.message.value, getIdCategories)
         this.setState({
             toggle: !this.state.toggle
         })
-
+        return false
     }
     onToggle() {
         this.setState({
@@ -50,18 +73,20 @@ class Articles extends React.Component {
         })
     }
     render() {
+        const { user, articles, categories } = this.props;
+        const { toggle } = this.state;
+        console.log(articles)
         return (
             <div className="container">
                 <div className="row">
                     <div className="col-md-9">
                         <div className="articles-view">
-                            {/* {this.state.toggle && this.props.user.token ? < CreateArticle /> : ''}
-                            {this.displayArticles(this.props.articles)} */}
-                            < CreateArticle handleSubmit={(e) => this.submitArticle(e)} />
+                            {toggle && user.token ? < CreateArticle handleSubmit={(e) => this.submitArticle(e)} categories={categories} /> : ''}
+                            {this.displayArticles(articles)}
                         </div>
                     </div>
                     <div className="col-md-3">
-                        {this.props.user.token ?
+                        {user.token ?
                             <div className="create-article" onClick={() => this.onToggle()} style={{ background: '#2D71C9', cursor: 'pointer' }}>
                                 <h3>Creer un article</h3>
                             </div>
@@ -70,25 +95,7 @@ class Articles extends React.Component {
                             </div>}
 
                         <div className="filter">
-                            <label className="container-check">Cuisine
-                        <input type="checkbox" />
-                                <span className="checkmark"></span>
-                            </label>
-
-                            <label className="container-check">Cinema
-                        <input type="checkbox" />
-                                <span className="checkmark"></span>
-                            </label>
-
-                            <label className="container-check">Musique
-                        <input type="checkbox" />
-                                <span className="checkmark"></span>
-                            </label>
-
-                            <label className="container-check">Sport
-                        <input type="checkbox" />
-                                <span className="checkmark"></span>
-                            </label>
+                            {this.displayCategories(categories)}
                         </div>
                     </div>
                 </div>
@@ -101,13 +108,17 @@ function mapStateToProps(state) {
     return {
         articles: state.articles,
         comments: state.comments,
-        user: state.user
+        user: state.user,
+        categories: state.categories
     }
 }
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         getArticles,
-        selectArticle
+        selectArticle,
+        getCategories,
+        createArticle,
+        filterCategories
     }, dispatch)
 }
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Articles));

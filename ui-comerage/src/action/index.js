@@ -11,7 +11,7 @@ export const getArticles = () => {
                 date: article.publication_date,
                 userName: await axios(`/user/${article.user_id}`).then(res => res.data.nickname),
                 id: article.id,
-                categories: await axios(`/categories/${article.id}`).then(res => res.data.categoriesName)
+                categories: await axios(`/categories/${article.id}`).then(res => res.data.arrayName)
             }
         });
         Promise.all(getUsers).then((completed) => {
@@ -92,6 +92,62 @@ export const addComment = (token, body, articleId) => {
         dispatch({
             type: actionType.CREATE_COMMENT,
             payload: comment.data.commentCreate
+        })
+    }
+
+}
+
+export const getCategories = () => {
+    return async dispatch => {
+        const categories = await axios('/categories');
+        dispatch({
+            type: actionType.DISPLAY_CATEGORIES,
+            payload: categories.data
+        })
+    }
+}
+
+export const createArticle = (token, body, categories) => {
+    return async dispatch => {
+        let data = { body, categories }
+        let headers = {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+        };
+        const addArticle = await axios.post('/create-article', data, { headers })
+        console.log(addArticle)
+        const articles = await axios('/articles');
+        const getUsers = articles.data.articles.map(async (article) => {
+            return {
+                body: article.body,
+                user_id: article.user_id,
+                date: article.publication_date,
+                userName: await axios(`/user/${article.user_id}`).then(res => res.data.nickname),
+                id: article.id,
+                categories: await axios(`/categories/${article.id}`).then(res => res.data.categoriesName)
+            }
+        });
+        Promise.all(getUsers).then((completed) => {
+            try {
+                dispatch({
+                    type: actionType.DISPLAY_ARTICLES,
+                    payload: completed
+                })
+            } catch (err) {
+                dispatch(err)
+            }
+        });
+    }
+
+}
+
+export const filterCategories = (event) => {
+    return async dispatch => {
+        const categories = event.target
+        console.log(categories.name)
+        dispatch({
+            type: actionType.FILTER_ARTICLES,
+            payload: categories.name
         })
     }
 

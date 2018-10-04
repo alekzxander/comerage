@@ -18,6 +18,16 @@ export default function articlesReducer(state = initialState, action) {
         case actionType.CREATE_COMMENT:
             state.comments.push(action.payload)
             return state;
+        case actionType.FILTER_ARTICLES:
+            const filter = state.filter((article) => {
+                if (article.categories.indexOf(action.payload) !== -1) {
+                    console.log(article.categories.indexOf(action.payload.name))
+                    return article;
+                }
+                return false;
+            })
+
+            return filter;
         default:
             return state;
     }
