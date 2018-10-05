@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { Link, withRouter } from 'react-router-dom';
 import CreateArticle from '../component/createArticle';
+import Moment from 'react-moment';
 
 class Articles extends React.Component {
     constructor(props) {
@@ -28,7 +29,7 @@ class Articles extends React.Component {
                         return <button key={cat.category.id} disabled className="category-article">{cat.category.name}</button>
                     })
                     }
-                    <h6 className="date-article">{article.data}</h6>
+                    <h6 className="date-article">< Moment format="DD/MM/YYYY" date={article.data} /></h6>
                     <h6 className="user-article">Posted by {article.user.nickname}</h6>
                     <div className="separator"></div>
                 </div >)
