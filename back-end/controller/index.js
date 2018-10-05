@@ -220,7 +220,7 @@ const index = (app) => {
             res.json({ commentCreate })
         }
     });
-    app.get('/delete-article/:id', verifyToken, async (req, res) => {
+    app.delete('/delete-article/:id', verifyToken, async (req, res) => {
         jwt.verify(req.token, 'secret', async (err, authData) => {
             if (err) {
                 res.sendStatus(401)
@@ -244,14 +244,15 @@ const index = (app) => {
                         });
                         const comments = await commentModel.findAll({
                             where: {
-                                articles_id: req.params.id
+                                article_id: req.params.id
                             }
                         });
-                        comments.forEach((ca) => {
-                            ca.destroy();
+                        comments.forEach(async (ca) => {
+                            await ca.destroy();
                         })
-                        articleCategory.forEach((ac) => {
-                            ac.destroy();
+                        console.log(articleCategory)
+                        articleCategory.forEach(async (ac) => {
+                            await ac.destroy();
                         })
                         articleSelected.destroy();
                         res.sendStatus(200)
@@ -262,6 +263,7 @@ const index = (app) => {
             }
         });
     });
+
     function verifyToken(req, res, next) {
         console.log(req.headers['authorization'], 'autorization header')
         const bearerHeader = req.headers['authorization'];

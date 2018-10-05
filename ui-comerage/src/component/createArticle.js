@@ -1,11 +1,11 @@
 import React from 'react'
 import { Field, reduxForm } from 'redux-form';
 
-const renderTextArea = ({ input, meta: { touched, error, warning } }) => (
+const renderTextArea = ({ input, messageText, labelText, meta: { touched, error, warning } }) => (
     <div>
-        <label>Ajouter un nouvelle article</label>
+        <label>{labelText}</label>
         <div>
-            <textarea {...input} placeholder="Content" rows="10" cols="40" />
+            <textarea {...input} value={messageText} placeholder="Content" rows="10" cols="40" maxLength="200">{messageText}</textarea>
             {touched && ((error && <span>{error}</span>) || (warning && <span>{warning}</span>))}
         </div>
     </div>
@@ -26,7 +26,7 @@ const displayCategories = (categories) => {
 
 }
 const CreateArticle = props => {
-    const { handleSubmit, submitting } = props
+    const { handleSubmit, submitting, message, submitText, label, update, handleChange } = props
     return (
         <div className="article-created">
             <form onSubmit={handleSubmit}>
@@ -35,14 +35,18 @@ const CreateArticle = props => {
                     type="textarea"
                     component={renderTextArea}
                     label="Votre article"
+                    messageText={message}
+                    labelText={label}
+                    onChange={handleChange}
                 />
-                <div className="category-select">
+                {!update ? <div className="category-select">
                     {displayCategories(props.categories)}
-                </div>
+                </div> : ''}
+
                 <div>
                     <button type="submit" className="submit-message" disabled={submitting}>
-                        Poster cette article
-          </button>
+                        {submitText}
+                    </button>
                 </div>
             </form>
         </div>

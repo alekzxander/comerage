@@ -184,10 +184,13 @@ body {
   background: white;
   width : 100%;
   padding: 20px;
-  min-height: 100px;
+  min-height: 200px;
   box-shadow: 0 8px 3px -8px #C1C1C1;
   margin-top: 60px;
   position: relative;
+}
+.article-seleted p {
+  margin-top: 40px;
 }
 .comments {
   margin-top: 10px;
@@ -230,4 +233,26 @@ textarea {
 }
 .category-select input {
   margin-right: 20px;
+}
+.delete-article {
+  position: absolute;
+  top : 3%;
+  right: 1%;
+  background: transparent;
+  border: 2px solid #E64646;
+  padding: 5px;
+  color: #E64646;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.update-article {
+  position: absolute;
+  top : 3%;
+  right: 10%;
+  background: transparent;
+  border: 2px solid #1BB560;
+  padding: 5px;
+  color: #1BB560;
+  border-radius: 4px;
+  cursor: pointer;
 }

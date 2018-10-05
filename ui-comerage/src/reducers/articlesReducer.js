@@ -12,7 +12,8 @@ export default function articlesReducer(state = initialState, action) {
                 user: action.payload.article.user.nickname,
                 comments: action.payload.article.comments,
                 date: action.payload.article.publication_date,
-                id: action.payload.article.id
+                id: action.payload.article.id,
+                user_id: action.payload.article.user_id
             }
             return article;
         case actionType.CREATE_COMMENT:

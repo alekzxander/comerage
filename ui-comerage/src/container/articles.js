@@ -9,9 +9,11 @@ class Articles extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            toggle: false
+            toggle: false,
+            filter: []
         }
         this.onToggle = this.onToggle.bind(this);
+        this.filter = this.filter.bind(this)
     }
     componentWillMount = () => {
         this.props.getArticles();
@@ -25,12 +27,12 @@ class Articles extends React.Component {
                     {article.categories.map((cat, id) => {
                         return <button key={id} disabled className="category-article">{cat}</button>
                     })
-
                     }
                     <h6 className="date-article">{article.date}</h6>
                     <h6 className="user-article">Posted by {article.userName}</h6>
                     <div className="separator"></div>
                 </div >)
+
             })
         }
     }
@@ -38,11 +40,25 @@ class Articles extends React.Component {
         return categories.map((category) => {
             return (
                 <label key={category.id} className="container-check">{category.name}
-                    <input type="checkbox" name={category.name} onChange={this.props.filterCategories} />
+                    <input type="checkbox" name={category.name} onChange={this.filter} />
                     <span className="checkmark"></span>
                 </label>
             )
         })
+    }
+    filter = (e) => {
+        if (e.target.checked) {
+            const category = e.target.name;
+            const join = this.state.filter.concat(category)
+            this.setState({
+                filter: join
+            })
+        } else {
+            this.setState({
+                filter: []
+            })
+        }
+
     }
     submitArticle(event) {
         event.preventDefault();
@@ -73,15 +89,15 @@ class Articles extends React.Component {
         })
     }
     render() {
+        console.log(this.state.filter)
         const { user, articles, categories } = this.props;
         const { toggle } = this.state;
-        console.log(articles)
         return (
             <div className="container">
                 <div className="row">
                     <div className="col-md-9">
                         <div className="articles-view">
-                            {toggle && user.token ? < CreateArticle handleSubmit={(e) => this.submitArticle(e)} categories={categories} /> : ''}
+                            {toggle && user.token ? < CreateArticle update={false} handleSubmit={(e) => this.submitArticle(e)} categories={categories} submitText={'Poster cette article'} label={'Creer un article'} /> : ''}
                             {this.displayArticles(articles)}
                         </div>
                     </div>

@@ -1,6 +1,5 @@
 import actionType from './types';
 import axios from 'axios';
-
 export const getArticles = () => {
     return async dispatch => {
         const articles = await axios('/articles');
@@ -124,7 +123,7 @@ export const createArticle = (token, body, categories) => {
                 date: article.publication_date,
                 userName: await axios(`/user/${article.user_id}`).then(res => res.data.nickname),
                 id: article.id,
-                categories: await axios(`/categories/${article.id}`).then(res => res.data.categoriesName)
+                categories: await axios(`/categories/${article.id}`).then(res => res.data.arrayName)
             }
         });
         Promise.all(getUsers).then((completed) => {
@@ -150,5 +149,25 @@ export const filterCategories = (event) => {
             payload: categories.name
         })
     }
-
+}
+export const deleteArticle = (id, token) => {
+    return async dispatch => {
+        let headers = {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+        };
+        const article = await axios.delete(`/delete-article/${id}`, { headers });
+        console.log(article)
+    }
+}
+export const updateArticle = (id, token, body) => {
+    console.log(id, token, data)
+    const data = { body }
+    return async dispatch => {
+        let headers = {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+        };
+        const article = await axios.put(`/update-article/${id}`, data, { headers });
+    }
 }
