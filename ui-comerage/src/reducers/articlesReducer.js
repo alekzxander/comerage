@@ -8,12 +8,12 @@ export default function articlesReducer(state = initialState, action) {
             return action.payload;
         case actionType.SELECT_ARTICLE:
             const article = {
-                view: action.payload.article.body,
-                user: action.payload.article.user.nickname,
-                comments: action.payload.article.comments,
-                date: action.payload.article.publication_date,
-                id: action.payload.article.id,
-                user_id: action.payload.article.user_id
+                view: action.payload.body,
+                user: action.payload.nickname,
+                comments: action.payload.comments,
+                date: action.payload.publication_date,
+                id: action.payload.id,
+                user_id: action.payload.user_id
             }
             return article;
         case actionType.CREATE_COMMENT:

@@ -9,6 +9,10 @@ const Sequelize = require('sequelize');
 
 articleModel.hasMany(commentModel);
 articleModel.belongsTo(userModel);
+articleModel.hasMany(categoryArticleModel);
+categoryArticleModel.belongsTo(articleModel);
+categoryModel.hasMany(categoryArticleModel);
+categoryArticleModel.belongsTo(categoryModel);
 
 // userModel.hasMany(articleModel);
 userModel.hasMany(commentModel);
@@ -164,7 +168,14 @@ const index = (app) => {
             const articleSelected = await articleModel.find({
                 where: {
                     id: req.params.id
-                }
+                },
+                include: [
+                    {
+                        model: commentModel,
+                    }, {
+                        model: userModel
+                    }
+                ],
             });
             const user = await userModel.find({
                 where: {
@@ -173,7 +184,8 @@ const index = (app) => {
             });
             if (user.id === articleSelected.user_id) {
                 articleSelected.update({ body: req.body.body })
-                res.sendStatus(200)
+                console.log(articleSelected)
+                res.json(articleSelected)
             } else {
                 res.sendStatus(401)
             }

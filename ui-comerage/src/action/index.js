@@ -72,9 +72,10 @@ export const getComments = (id) => {
 export const selectArticle = (id) => {
     return async dispatch => {
         const article = await axios(`/article/${id}`);
+        console.log(article.data)
         dispatch({
             type: actionType.SELECT_ARTICLE,
-            payload: article.data
+            payload: article.data.article
         })
     }
 }
@@ -161,7 +162,6 @@ export const deleteArticle = (id, token) => {
     }
 }
 export const updateArticle = (id, token, body) => {
-    console.log(id, token, data)
     const data = { body }
     return async dispatch => {
         let headers = {
@@ -169,5 +169,10 @@ export const updateArticle = (id, token, body) => {
             'Authorization': token,
         };
         const article = await axios.put(`/update-article/${id}`, data, { headers });
+        console.log(article.data)
+        dispatch({
+            type: actionType.SELECT_ARTICLE,
+            payload: article.data
+        })
     }
 }
