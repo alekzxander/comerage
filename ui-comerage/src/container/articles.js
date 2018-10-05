@@ -24,23 +24,24 @@ class Articles extends React.Component {
             return articles.map((article) => {
                 return (<div key={article.id} className="article">
                     <Link to="/article" onClick={() => this.props.selectArticle(article.id)}><p>{article.body}</p></Link>
-                    {article.categories.map((cat, id) => {
-                        return <button key={id} disabled className="category-article">{cat}</button>
+                    {article.categories.map((cat) => {
+                        return <button key={cat.category.id} disabled className="category-article">{cat.category.name}</button>
                     })
                     }
-                    <h6 className="date-article">{article.date}</h6>
-                    <h6 className="user-article">Posted by {article.userName}</h6>
+                    <h6 className="date-article">{article.data}</h6>
+                    <h6 className="user-article">Posted by {article.user.nickname}</h6>
                     <div className="separator"></div>
                 </div >)
 
             })
         }
+
     }
     displayCategories = (categories) => {
         return categories.map((category) => {
             return (
                 <label key={category.id} className="container-check">{category.name}
-                    <input type="checkbox" name={category.name} onChange={this.filter} />
+                    <input type="checkbox" id={category.id} name={category.name} onChange={this.filter} />
                     <span className="checkmark"></span>
                 </label>
             )
@@ -48,7 +49,7 @@ class Articles extends React.Component {
     }
     filter = (e) => {
         if (e.target.checked) {
-            const category = e.target.name;
+            const category = e.target.id;
             const join = this.state.filter.concat(category)
             this.setState({
                 filter: join
@@ -58,7 +59,9 @@ class Articles extends React.Component {
                 filter: []
             })
         }
-
+    }
+    handleFilter = () => {
+        this.props.filterCategories(this.state.filter);
     }
     submitArticle(event) {
         event.preventDefault();
@@ -89,7 +92,6 @@ class Articles extends React.Component {
         })
     }
     render() {
-        console.log(this.state.filter)
         const { user, articles, categories } = this.props;
         const { toggle } = this.state;
         return (
@@ -109,9 +111,9 @@ class Articles extends React.Component {
                             : <div className="create-article" style={{ background: '#A7A6A6' }}>
                                 <h3>Creer un article</h3>
                             </div>}
-
                         <div className="filter">
                             {this.displayCategories(categories)}
+                            <button className="create-article" onClick={() => this.handleFilter()}>Valider</button>
                         </div>
                     </div>
                 </div>

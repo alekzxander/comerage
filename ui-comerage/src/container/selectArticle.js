@@ -56,6 +56,7 @@ class SelectArticle extends React.Component {
         })
     }
     handleDelete() {
+        console.log('delete on view')
         const { article, user } = this.props;
         this.props.deleteArticle(article.id, user.token);
         return <Redirect to="/" />
@@ -80,7 +81,7 @@ class SelectArticle extends React.Component {
                     <p>{article.view}</p>
                     <h6 className="date-article">{article.date}</h6>
                     <h6 className="user-article">Posted by {article.user}</h6>
-                    {user.id === article.user_id ? <div> <button className="delete-article" onClick={() => this.handleDelete.bind(this)}>Supprimer</button>
+                    {user.id === article.user_id ? <div> <button className="delete-article" onClick={this.handleDelete.bind(this)}>Supprimer</button>
                         <button className="update-article" onClick={this.onToggle}>Modifier</button></div> : ''}
                 </div>
                 <div className="row">

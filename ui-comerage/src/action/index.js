@@ -3,26 +3,10 @@ import axios from 'axios';
 export const getArticles = () => {
     return async dispatch => {
         const articles = await axios('/articles');
-        const getUsers = articles.data.articles.map(async (article) => {
-            return {
-                body: article.body,
-                user_id: article.user_id,
-                date: article.publication_date,
-                userName: await axios(`/user/${article.user_id}`).then(res => res.data.nickname),
-                id: article.id,
-                categories: await axios(`/categories/${article.id}`).then(res => res.data.arrayName)
-            }
-        });
-        Promise.all(getUsers).then((completed) => {
-            try {
-                dispatch({
-                    type: actionType.DISPLAY_ARTICLES,
-                    payload: completed
-                })
-            } catch (err) {
-                dispatch(err)
-            }
-        });
+        dispatch({
+            type: actionType.DISPLAY_ARTICLES,
+            payload: articles.data.articles
+        })
     }
 };
 
@@ -87,11 +71,13 @@ export const addComment = (token, body, articleId) => {
             'Content-Type': 'application/json',
             'Authorization': token,
         };
-
         const comment = await axios.post(`/add-comment/${articleId}`, data, { headers });
+        const id = comment.data.commentCreate.article_id;
+        const article = await axios(`/article/${id}`);
+        console.log(article.data)
         dispatch({
-            type: actionType.CREATE_COMMENT,
-            payload: comment.data.commentCreate
+            type: actionType.SELECT_ARTICLE,
+            payload: article.data.article
         })
     }
 
@@ -117,48 +103,42 @@ export const createArticle = (token, body, categories) => {
         const addArticle = await axios.post('/create-article', data, { headers })
         console.log(addArticle)
         const articles = await axios('/articles');
-        const getUsers = articles.data.articles.map(async (article) => {
-            return {
-                body: article.body,
-                user_id: article.user_id,
-                date: article.publication_date,
-                userName: await axios(`/user/${article.user_id}`).then(res => res.data.nickname),
-                id: article.id,
-                categories: await axios(`/categories/${article.id}`).then(res => res.data.arrayName)
-            }
-        });
-        Promise.all(getUsers).then((completed) => {
-            try {
-                dispatch({
-                    type: actionType.DISPLAY_ARTICLES,
-                    payload: completed
-                })
-            } catch (err) {
-                dispatch(err)
-            }
+        dispatch({
+            type: actionType.DISPLAY_ARTICLES,
+            payload: articles.data.articles
         });
     }
 
 }
 
-export const filterCategories = (event) => {
+export const filterCategories = (filters) => {
     return async dispatch => {
-        const categories = event.target
-        console.log(categories.name)
+        let articles;
+        if (filters.length === 0) {
+            articles = await axios(`/articles`)
+        } else {
+            articles = await axios(`/articles/?category=${filters}`)
+        }
         dispatch({
-            type: actionType.FILTER_ARTICLES,
-            payload: categories.name
+            type: actionType.DISPLAY_ARTICLES,
+            payload: articles.data.articles
         })
     }
 }
 export const deleteArticle = (id, token) => {
+    console.log('delete article')
     return async dispatch => {
         let headers = {
             'Content-Type': 'application/json',
             'Authorization': token,
         };
-        const article = await axios.delete(`/delete-article/${id}`, { headers });
-        console.log(article)
+        const deleteArticle = await axios.delete(`/delete-article/${id}`, { headers });
+        const articles = await axios('/articles');
+        console.log(deleteArticle)
+        dispatch({
+            type: actionType.DISPLAY_ARTICLES,
+            payload: articles.data.articles
+        })
     }
 }
 export const updateArticle = (id, token, body) => {

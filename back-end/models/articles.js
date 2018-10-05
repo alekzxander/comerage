@@ -18,7 +18,6 @@ const articleModel = sequelizeDb.define('articles', {
         type: Sequelize.INTEGER,
         allowNull: false
     }
-
 });
 
 module.exports = articleModel;

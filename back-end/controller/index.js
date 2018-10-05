@@ -27,14 +27,57 @@ const index = (app) => {
         const categories = await categoryModel.findAll();
         res.json({ categories })
     })
-    app.get('/articles', async (req, res) => {
-        const articles = await articleModel.findAll({
-            where: {
-                draft: false
-            },
-            order: [['publication_date', 'DESC']]
-        });
-        res.json({ articles })
+
+    app.get('/articles/:category?', async (req, res) => {
+        if (Object.keys(req.query).length === 0) {
+            console.log('CONDITION NOT QUERY')
+            const articles = await articleModel.findAll({
+                where: {
+                    draft: false
+                },
+                include: [
+                    {
+                        model: categoryArticleModel,
+                        include: [
+                            {
+                                model: categoryModel
+                            }
+                        ],
+
+                    },
+                    {
+                        model: userModel
+                    }
+                ],
+                order: [['publication_date', 'DESC']]
+            });
+            res.json({ articles })
+        } else {
+            const articles = await articleModel.findAll({
+                where: {
+                    draft: false
+                },
+                include: [
+                    {
+                        model: categoryArticleModel,
+                        where: {
+                            category_id: req.query.category
+                        },
+                        include: [
+                            {
+                                model: categoryModel
+                            }
+                        ],
+                    },
+                    {
+                        model: userModel
+                    }
+                ],
+                order: [['publication_date', 'DESC']]
+            });
+            res.json({ articles })
+        }
+
     });
     app.get('/comments/:article_id', async (req, res) => {
 
@@ -64,11 +107,11 @@ const index = (app) => {
     app.get('/categories/:article_id', async (req, res) => {
         const categoriesArticle = await categoryArticleModel.findAll({
             where: {
-                articles_id: req.params.article_id
+                article_id: req.params.article_id
             }
         });
         const categories = categoriesArticle.map((cat) => {
-            return cat.categories_id;
+            return cat.category_id;
         })
         const categoriesName = await categoryModel.findAll({
             where: {
@@ -151,11 +194,11 @@ const index = (app) => {
             }
             const data = await articleModel.create(article);
             const category = {
-                categories_id: req.body.categories,
-                articles_id: data.id
+                category_id: req.body.categories,
+                article_id: data.id
             }
             req.body.categories.forEach(async (cat) => {
-                const addCategory = await categoryArticleModel.create({ categories_id: cat, articles_id: data.id })
+                const addCategory = await categoryArticleModel.create({ category_id: cat, article_id: data.id })
             })
             res.sendStatus(200)
         }
@@ -233,6 +276,7 @@ const index = (app) => {
         }
     });
     app.delete('/delete-article/:id', verifyToken, async (req, res) => {
+        console.log('DELETE ARTICLE')
         jwt.verify(req.token, 'secret', async (err, authData) => {
             if (err) {
                 res.sendStatus(401)
@@ -251,7 +295,7 @@ const index = (app) => {
                     if (user.id === articleSelected.user_id) {
                         const articleCategory = await categoryArticleModel.findAll({
                             where: {
-                                articles_id: articleSelected.id
+                                article_id: articleSelected.id
                             }
                         });
                         const comments = await commentModel.findAll({

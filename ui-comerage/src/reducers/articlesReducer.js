@@ -5,7 +5,16 @@ const initialState = [];
 export default function articlesReducer(state = initialState, action) {
     switch (action.type) {
         case actionType.DISPLAY_ARTICLES:
-            return action.payload;
+            const articlesWithCategories = action.payload.map((article) => {
+                return {
+                    id: article.id,
+                    body: article.body,
+                    user: article.user,
+                    categories: article.categories_has_articles,
+                    data: article.publication_date
+                }
+            });
+            return articlesWithCategories;
         case actionType.SELECT_ARTICLE:
             const article = {
                 view: action.payload.body,
